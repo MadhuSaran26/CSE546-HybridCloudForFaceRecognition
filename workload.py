@@ -1,13 +1,26 @@
 from boto3 import client as boto3_client
+import boto3
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 input_bucket = "image-classification-input"
 output_bucket = "image-classification-output"
 test_cases = "test_cases/"
+S3_SERVICE = os.getenv("S3_SERVICE")
+CEPH_ACCESSKEY_ID = os.getenv("CEPH_ACCESSKEY_ID")
+CEPH_SECRETKEY_ID = os.getenv("CEPH_SECRETKEY_ID")
+CEPH_ENDPOINT_URL = os.getenv("CEPH_ENDPOINT_URL")
 
 def clear_input_bucket():
 	global input_bucket
-	s3 = boto3_client('s3')
+	s3 = boto3.client(
+		S3_SERVICE,
+		aws_access_key_id=CEPH_ACCESSKEY_ID,
+		aws_secret_access_key=CEPH_SECRETKEY_ID,
+		endpoint_url=CEPH_ENDPOINT_URL
+	)
+
 	list_obj = s3.list_objects_v2(Bucket=input_bucket)
 	try:
 		for item in list_obj["Contents"]:
@@ -18,7 +31,12 @@ def clear_input_bucket():
 	
 def clear_output_bucket():
 	global output_bucket
-	s3 = boto3_client('s3')
+	s3 = boto3.client(
+		S3_SERVICE,
+		aws_access_key_id=CEPH_ACCESSKEY_ID,
+		aws_secret_access_key=CEPH_SECRETKEY_ID,
+		endpoint_url=CEPH_ENDPOINT_URL
+	)
 	list_obj = s3.list_objects_v2(Bucket=output_bucket)
 	try:
 		for item in list_obj["Contents"]:
@@ -29,7 +47,12 @@ def clear_output_bucket():
 
 def upload_to_input_bucket_s3(path, name):
 	global input_bucket
-	s3 = boto3_client('s3')
+	s3 = boto3.client(
+		S3_SERVICE,
+		aws_access_key_id=CEPH_ACCESSKEY_ID,
+		aws_secret_access_key=CEPH_SECRETKEY_ID,
+		endpoint_url=CEPH_ENDPOINT_URL
+	)
 	s3.upload_file(path + name, input_bucket, name)
 	
 	
@@ -52,11 +75,11 @@ def upload_files(test_case):
 	
 def workload_generator():
 	
-	#print("Running Test Case 1")
-	#upload_files("test_case_1")
+	print("Running Test Case 1")
+	upload_files("test_case_1")
 
-	print("Running Test Case 2")
-	upload_files("test_case_2")
+	# print("Running Test Case 2")
+	# upload_files("test_case_2")
 	
 
 # clear_input_bucket()

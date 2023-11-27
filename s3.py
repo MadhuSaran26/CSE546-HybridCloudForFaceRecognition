@@ -1,40 +1,28 @@
 import boto3
-import boto
-import boto.s3.connection
 import os
 from dotenv import load_dotenv
 load_dotenv()
 
 S3_SERVICE = os.getenv("S3_SERVICE")
-INPUT_BUCKET_NAME = os.getenv("INPUT_S3_BUCKET_NAME")
+INPUT_BUCKET_NAME = os.getenv("INPUT_CEPH_BUCKET_NAME")
 INPUT_S3_FILE_LOCATION = os.getenv("S3_LOCATION").format(INPUT_BUCKET_NAME)
-OUTPUT_BUCKET_NAME = os.getenv("OUTPUT_S3_BUCKET_NAME")
+OUTPUT_BUCKET_NAME = os.getenv("OUTPUT_CEPH_BUCKET_NAME")
 OUTPUT_S3_FILE_LOCATION = os.getenv("S3_LOCATION").format(OUTPUT_BUCKET_NAME)
 INPUT_LOCAL_STORAGE_DIR = os.getenv("INPUT_LOCAL_STORAGE_DIR")
 INPUT_FRAME_STORAGE_DIR = os.getenv("INPUT_FRAME_STORAGE_DIR")
 OUTPUT_FILE_DIRECTORY = os.getenv("OUTPUT_FILE_DIRECTORY")
 AWS_ACCESS_KEY_ID = os.getenv("ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("SECRET_ACCESS_KEY")
+CEPH_ACCESSKEY_ID = os.getenv("CEPH_ACCESSKEY_ID")
+CEPH_SECRETKEY_ID = os.getenv("CEPH_SECRETKEY_ID")
+CEPH_ENDPOINT_URL = os.getenv("CEPH_ENDPOINT_URL")
+
 s3Client = boto3.client(
     S3_SERVICE,
-    aws_access_key_id=AWS_ACCESS_KEY_ID,
-    aws_secret_access_key=AWS_SECRET_ACCESS_KEY
+    aws_access_key_id=CEPH_ACCESSKEY_ID,
+    aws_secret_access_key=CEPH_SECRETKEY_ID,
+    endpoint_url=CEPH_ENDPOINT_URL
 )
-conn = boto.connect_s3(
-    aws_access_key_id="diyaaccesskey",
-    aws_secret_access_key="diyasecretkey",
-    host='https://192.168.64.8:8000',
-    is_secure=False,               # uncomment if you are not using ssl
-    calling_format=boto.s3.connection.OrdinaryCallingFormat()
-)
-for bucket in conn.get_all_buckets():
-        print("{name}\t{created}".format(
-                name = bucket.name,
-                created = bucket.creation_date,
-        ))
-def creates3InputBucket():
-    conn.create_bucket("test-bucket")
-    print("Creating bucket")
 
 def downloadVideoFromS3ToLocal(key):
     if not os.path.exists(INPUT_LOCAL_STORAGE_DIR):
