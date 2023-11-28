@@ -2,6 +2,8 @@ from boto3 import client as boto3_client
 import boto3
 import os
 from dotenv import load_dotenv
+import monitorInputBucket
+import threading
 load_dotenv()
 
 input_bucket = "image-classification-input"
@@ -80,11 +82,11 @@ def workload_generator():
 
 	# print("Running Test Case 2")
 	# upload_files("test_case_2")
-	
 
-# clear_input_bucket()
-clear_output_bucket()	
-workload_generator()	
+clear_input_bucket()
+clear_output_bucket()
+workload_generator()
+
 
 	
 
