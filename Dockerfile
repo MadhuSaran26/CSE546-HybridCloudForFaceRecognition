@@ -1,77 +1,51 @@
-# Define global args
-# ARG FUNCTION_DIR="/tmp/"
-# ARG FUNCTION_DIR=${LAMBDA_TASK_ROOT}
-ARG FUNCTION_DIR="/home/app/"
-ARG RUNTIME_VERSION="3.8"
-ARG DISTRO_VERSION="3.12"
+ARG PYTHON_VERSION=3.8
+FROM --platform=${TARGETPLATFORM:-linux/amd64} python:${PYTHON_VERSION}-slim-buster as build
 
-# Stage 1 - bundle base image + runtime
-# Grab a fresh copy of the image and install GCC
-FROM python:${RUNTIME_VERSION} AS python-alpine
-# Install GCC (Alpine uses musl but we compile and link dependencies with GCC)
-#RUN apk add --no-cache \
-#    libstdc++
+RUN apt-get update && \
+    apt-get install -y build-essential cmake ca-certificates libgl1-mesa-glx && \
+    apt-get install -y ffmpeg
 
-RUN apt-get update \
-    && apt-get install -y cmake ca-certificates libgl1-mesa-glx
-RUN python${RUNTIME_VERSION} -m pip install --upgrade pip
+RUN python3 -m pip install --upgrade pip
 
-# Stage 2 - build function and dependencies
-FROM python-alpine AS build-image
-# Install aws-lambda-cpp build dependencies
-#RUN apk add --no-cache \
-#    build-base \
-#    libtool \
-#    autoconf \
-#    automake \
-#    libexecinfo-dev \
-#    make \
-#    cmake \
-#    libcurl
-# Include global args in this stage of the build
-ARG FUNCTION_DIR
-ARG RUNTIME_VERSION
-# Create function directory
-RUN mkdir -p ${FUNCTION_DIR}
+# Add non root user
+RUN addgroup --system app && adduser app --system --ingroup app
+RUN chown app /home/app
 
-# Optional – Install the function's dependencies
-# RUN python${RUNTIME_VERSION} -m pip install -r requirements.txt --target ${FUNCTION_DIR}
-# Install Lambda Runtime Interface Client for Python
-RUN python${RUNTIME_VERSION} -m pip install awslambdaric --target ${FUNCTION_DIR}
+USER app
 
-# Stage 3 - final runtime image
-# Grab a fresh copy of the Python image
-FROM python-alpine
-# Include global arg in this stage of the build
-ARG FUNCTION_DIR
-# Set working directory to function root directory
-WORKDIR ${FUNCTION_DIR}
-# Copy in the built dependencies
-COPY --from=build-image ${FUNCTION_DIR} ${FUNCTION_DIR}
-# (Optional) Add Lambda Runtime Interface Emulator and use a script in the ENTRYPOINT for simpler local runs
-ADD https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/latest/download/aws-lambda-rie /usr/bin/aws-lambda-rie
-RUN chmod 755 /usr/bin/aws-lambda-rie
+ENV PATH=$PATH:/home/app/.local/bin
 
-# Install ffmpeg
-RUN apt-get install -y ffmpeg
+WORKDIR /home/app/
 
-# Copy handler function
-COPY requirements.txt ${FUNCTION_DIR}
-RUN python${RUNTIME_VERSION} -m pip install -r requirements.txt --target ${FUNCTION_DIR}
-COPY entry.sh /
+COPY --chown=app:app monitorInputBucket.py           .
+COPY --chown=app:app dynamodb.py           .
+COPY --chown=app:app s3.py   .
+COPY --chown=app:app .env   .
+COPY --chown=app:app encoding   .
+COPY --chown=app:app csvUtil.py   .
+USER app
 
-# Copy function code
-COPY handler.py ${FUNCTION_DIR}
-RUN chmod 777 /entry.sh
+RUN mkdir -p face-recognition
+RUN touch ./face-recognition/__init__.py
+WORKDIR /home/app/face-recognition/
+COPY --chown=app:app face-recognition/requirements.txt	.
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy other needed files
-COPY dynamodb.py ${FUNCTION_DIR}
-COPY s3.py ${FUNCTION_DIR}
-COPY .env ${FUNCTION_DIR}
-COPY encoding ${FUNCTION_DIR}
-COPY csvUtil.py ${FUNCTION_DIR}
+USER root
+COPY --chown=app:app face-recognition/   .
 
-# Set the CMD to your handler (could also be done as a parameter override outside of the Dockerfile)
-# CMD [ "handler.handler" ]
-ENTRYPOINT [ "/entry.sh" ]
-CMD [ "handler.face_recognition_handler" ]
+FROM build as test
+
+ARG TEST_COMMAND=tox
+ARG TEST_ENABLED=true
+RUN [ "$TEST_ENABLED" = "false" ] && echo "skipping tests" || eval "$TEST_COMMAND"
+
+FROM build as ship
+WORKDIR /home/app/
+
+USER app
+
+HEALTHCHECK --interval=5s CMD [ -e /tmp/.lock ] || exit 1
+
+CMD ["python", "monitorInputBucket.py"]
+

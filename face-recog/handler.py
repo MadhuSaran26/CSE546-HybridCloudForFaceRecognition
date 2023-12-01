@@ -39,10 +39,11 @@ def compare_image_with_embeddings(framePath, encodingData):
 		faceRecognized = True
 		return faceRecognized, resultName
 
-def face_recognition_handler(event, context):
-	eventInput = json.dumps(event)
-	eventJson = json.loads(eventInput)
-	objectKey = eventJson['Records'][0]['s3']['object']['key']
+def handle(event, context):
+	#eventInput = json.dumps(event.body)
+	#eventJson = json.loads(eventInput)
+	print(event)
+	objectKey = event['key']
 	videoPath = s3Util.downloadVideoFromS3ToLocal(objectKey)
 	videoName = os.path.basename(videoPath)
 	extract_frames(videoPath)
