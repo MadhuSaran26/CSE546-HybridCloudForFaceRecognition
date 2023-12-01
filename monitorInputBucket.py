@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import boto3
 import requests
 import time
@@ -58,5 +57,4 @@ def monitor_input():
         time.sleep(10)
 
 if __name__ == "__main__":
-    print(456)
     monitor_input()

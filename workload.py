@@ -1,8 +1,9 @@
 from boto3 import client as boto3_client
 import boto3
 import os
+import requests
 from dotenv import load_dotenv
-import monitorInputBucket
+#import monitorInputBucket
 import threading
 load_dotenv()
 
@@ -13,6 +14,7 @@ S3_SERVICE = os.getenv("S3_SERVICE")
 CEPH_ACCESSKEY_ID = os.getenv("CEPH_ACCESSKEY_ID")
 CEPH_SECRETKEY_ID = os.getenv("CEPH_SECRETKEY_ID")
 CEPH_ENDPOINT_URL = os.getenv("CEPH_ENDPOINT_URL")
+OPENFAAS_FUNCTION_URL = 'http://127.0.0.1:8080/function/face-recog'
 
 def clear_input_bucket():
 	global input_bucket
@@ -56,6 +58,14 @@ def upload_to_input_bucket_s3(path, name):
 		endpoint_url=CEPH_ENDPOINT_URL
 	)
 	s3.upload_file(path + name, input_bucket, name)
+	payload = {"key": name}
+	headers = {"Content-Type": "application/json"}             
+	response = requests.post(OPENFAAS_FUNCTION_URL, json=payload, headers=headers)
+                
+	if response.status_code == 200:
+		print("Function invoked successfully.")
+	else:
+		print(f"Error invoking function. Status code: {response.status_code}")
 	
 	
 def upload_files(test_case):	
