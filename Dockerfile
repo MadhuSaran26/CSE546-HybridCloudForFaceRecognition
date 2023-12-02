@@ -6,6 +6,7 @@ RUN apt-get update && \
     apt-get install -y ffmpeg
 
 RUN python3 -m pip install --upgrade pip
+RUN pip install --upgrade setuptools
 
 # Add non root user
 RUN addgroup --system app && adduser app --system --ingroup app

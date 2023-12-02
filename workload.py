@@ -14,7 +14,7 @@ S3_SERVICE = os.getenv("S3_SERVICE")
 CEPH_ACCESSKEY_ID = os.getenv("CEPH_ACCESSKEY_ID")
 CEPH_SECRETKEY_ID = os.getenv("CEPH_SECRETKEY_ID")
 CEPH_ENDPOINT_URL = os.getenv("CEPH_ENDPOINT_URL")
-OPENFAAS_FUNCTION_URL = 'http://127.0.0.1:8080/function/face-recog'
+OPENFAAS_FUNCTION_URL = 'http://127.0.0.1:8080/function/face-recognition-phttp'
 
 def clear_input_bucket():
 	global input_bucket
@@ -65,7 +65,7 @@ def upload_to_input_bucket_s3(path, name):
 	if response.status_code == 200:
 		print("Function invoked successfully.")
 	else:
-		print(f"Error invoking function. Status code: {response.status_code}")
+		print(f"Error invoking function. Status code: {response}")
 	
 	
 def upload_files(test_case):	

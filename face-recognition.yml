@@ -6,5 +6,5 @@ functions:
   face-recognition-sys:
     lang: python3
     handler: ./face-recognition
-    image: madhusaranvj267/face-recognition-sys:latest
+    image: 171197/face-recognition-sys:latest
 

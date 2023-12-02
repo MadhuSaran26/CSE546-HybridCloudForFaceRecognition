@@ -55,6 +55,5 @@ def monitor_input():
 
     # Sleep for some time before checking again
         time.sleep(10)
-
-if __name__ == "__main__":
-    monitor_input()
+# if __name__ == "__main__":
+#     monitor_input()

@@ -1,4 +1,4 @@
-ARG PYTHON_VERSION=3.8
+ARG PYTHON_VERSION=3.11
 FROM --platform=${TARGETPLATFORM:-linux/amd64} ghcr.io/openfaas/of-watchdog:0.9.10 as watchdog
 FROM --platform=${TARGETPLATFORM:-linux/amd64} python:${PYTHON_VERSION}-alpine as build
 
@@ -8,7 +8,23 @@ RUN chmod +x /usr/bin/fwatchdog
 ARG ADDITIONAL_PACKAGE
 # Alternatively use ADD https:// (which will not be cached by Docker builder)
 
+
+
 RUN apk --no-cache add ${ADDITIONAL_PACKAGE}
+RUN apk --no-cache add \
+    g++ \
+    gcc \
+    make \
+    libc-dev \
+    musl-dev \
+    linux-headers \
+    cython \
+    ffmpeg \
+    build-base
+
+RUN apk --no-cache update && apk --no-cache upgrade
+
+
 
 # Add non root user
 RUN addgroup -S app && adduser app -S -G app
@@ -27,6 +43,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Build the function directory and install any user-specified components
 USER app
+ENV PATH=$PATH:/home/app/.local/bin:/home/app/python/bin/
+ENV PYTHONPATH=$PYTHONPATH:/home/app/python
 
 RUN mkdir -p function
 RUN touch ./function/__init__.py

@@ -115,9 +115,9 @@ def compare_image_with_embeddings(framePath, encodingData):
 
 def handle(event, context):
 	#eventInput = json.dumps(event.body)
-	#eventJson = json.loads(eventInput)
-	print(event)
-	objectKey = event['key']
+	eventJson = json.loads(event.body)
+	print(eventJson)
+	objectKey = eventJson['key']
 	videoPath = downloadVideoFromS3ToLocal(objectKey)
 	videoName = os.path.basename(videoPath)
 	extract_frames(videoPath)

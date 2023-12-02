@@ -3,8 +3,11 @@
 
 from flask import Flask, request, jsonify
 from function import handler
+from waitress import serve
+import threading
 
 app = Flask(__name__)
+
 
 @app.route("/", methods=["POST"])
 def handle_request():
@@ -22,4 +25,4 @@ def handle_request():
         return jsonify({"error": str(e)})
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=6000)
+    serve(app, host='0.0.0.0', port=8089)
