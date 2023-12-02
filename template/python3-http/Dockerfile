@@ -8,15 +8,19 @@ RUN chmod +x /usr/bin/fwatchdog
 ARG ADDITIONAL_PACKAGE
 # Alternatively use ADD https:// (which will not be cached by Docker builder)
 
+RUN apk --no-cache add musl-dev libffi-dev gcc make ${ADDITIONAL_PACKAGE}
 
-
-RUN apk --no-cache add ${ADDITIONAL_PACKAGE}
 RUN apk --no-cache add \
-    g++ \
-    gcc \
-    make \
+    cmake \
+    ca-certificates \
+    ffmpeg \
     libc-dev \
-    musl-dev \
+    linux-headers \
+    cython \
+    build-base \
+    gfortran \
+    g++ \
+    libc-dev \
     linux-headers \
     cython \
     ffmpeg \

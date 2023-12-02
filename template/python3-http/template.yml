@@ -3,17 +3,18 @@ fprocess: python index.py
 build_options:
   - name: dev
     packages: 
-      - make
       - automake
-      - gcc
       - g++
       - subversion
       - python3-dev
-      - musl-dev
-      - libffi-dev
       - git
       - build-essential
       - cmake
       - ca-certificates
       - libgl1-mesa-glx
       - ffmpeg
+      - libc-dev
+      - linux-headers
+      - cython
+      - build-base
+      - gfortran
