@@ -1,0 +1,11 @@
+boto3~=1.29.6
+dlib
+numpy
+flask
+face_recognition
+opencv-python
+ffmpeg
+awscli
+smart_open
+python-dotenv~=1.0.0
+requests~=2.31.0
