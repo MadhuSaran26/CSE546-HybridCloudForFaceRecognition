@@ -6,5 +6,5 @@ functions:
   face-recognition-http:
     lang: python3-http-debian
     handler: ./face-recognition-http
-    image: 171197/face-recognition-http:latest
+    image: madhusaranvj267/face-recognition-http:latest
 

@@ -6,5 +6,5 @@ functions:
   face-recognition-phttp:
     lang: python3-http
     handler: ./face-recognition-phttp
-    image: 171197/face-recognition-phttp:latest
+    image: madhusaranvj267/face-recognition-phttp:latest
 
